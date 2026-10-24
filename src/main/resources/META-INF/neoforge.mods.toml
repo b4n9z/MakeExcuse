@@ -2,7 +2,6 @@ modLoader="javafml"
 loaderVersion="${neoLoaderVersion}"
 license="MIT"
 issueTrackerURL="https://github.com/b4n9z/MakeExcuse/issues"
-logoFile="icon.png"
 
 [[mods]]
 modId="makeexcuse"
