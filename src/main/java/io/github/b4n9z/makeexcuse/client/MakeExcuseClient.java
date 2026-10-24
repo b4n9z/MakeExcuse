@@ -34,7 +34,7 @@ public class MakeExcuseClient {
         }
 
         // Avoid dropping connection while the player is typing messages into the chat screen
-        if (client.gui != null && client.gui.screen() instanceof ChatScreen) {
+        if (client.screen instanceof ChatScreen) {
             return;
         }
 

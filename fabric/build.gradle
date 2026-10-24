@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom-remap' version '1.17-SNAPSHOT'
 }
 
 def parentProperties = file('../gradle.properties')
@@ -42,10 +42,11 @@ sourceSets {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.fabricMcVersion}"
-    implementation "net.fabricmc:fabric-loader:${project.fabricLoaderVersion}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabricApiVersion}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.fabricLoaderVersion}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricApiVersion}"
 
-    implementation "com.terraformersmc:modmenu:${project.fabricModMenuVersion}"
+    modImplementation "com.terraformersmc:modmenu:${project.fabricModMenuVersion}"
 }
 
 processResources {
