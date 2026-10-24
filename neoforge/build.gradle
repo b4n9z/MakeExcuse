@@ -1,0 +1,91 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.147'
+}
+
+def parentProperties = file('../gradle.properties')
+if (parentProperties.exists()) {
+    def props = new Properties()
+    parentProperties.withInputStream { props.load(it) }
+    props.each { key, value ->
+        project.ext[key] = value
+    }
+}
+
+version = project.modVersion
+group = "io.github.b4n9z"
+base.archivesName = "${project.modName}-neoforge-mc${project.neoMcVersion}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(project.modJavaVersion)
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['../src/main/java']
+            exclude 'io/github/b4n9z/makeexcuse/fabric/**'
+            exclude 'io/github/b4n9z/makeexcuse/forge/**'
+        }
+
+        resources {
+            srcDirs = ['../src/main/resources']
+            exclude 'fabric.mod.json'
+            exclude 'META-INF/mods.toml'
+        }
+    }
+}
+
+processResources {
+    inputs.property "version", project.modVersion
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand([
+                "version": project.modVersion,
+                "neoLoaderVersion": project.neoLoaderVersion,
+                "modCredits": project.modCredits,
+                "modDescription": project.modDescription,
+        ])
+    }
+}
+
+neoForge {
+    version = project.neoVersion
+
+    runs {
+        client {
+            client()
+            systemProperty 'forge.enabledGameTestNamespaces', "makeexcuse"
+        }
+
+        server {
+            server()
+            systemProperty 'forge.enabledGameTestNamespaces', "makeexcuse"
+            programArgument '--nogui'
+        }
+
+        clientData {
+            clientData()
+            programArguments.addAll '--mod', 'makeexcuse',
+                    '--all',
+                    '--output', layout.buildDirectory.dir('generated/resources').get().asFile.absolutePath,
+                    '--existing', file('../src/main/resources').absolutePath
+        }
+
+        configureEach {
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        makeexcuse {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+tasks.register('srcJar', Jar) {
+    archiveClassifier.set("src")
+    from sourceSets.main.allJava
+}
+
+tasks.named("assemble") {
+    dependsOn(srcJar)
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "makeexcuse",
+  "version": "${version}",
+  "name": "MakeExcuse",
+  "description": "${modDescription}",
+  "authors": [
+    "b4n9z"
+  ],
+  "contact": {
+    "homepage": "https://b4n9z.github.io",
+    "sources": "https://github.com/b4n9z/MakeExcuse"
+  },
+  "icon": "icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "io.github.b4n9z.makeexcuse.fabric.MakeExcuseFabricClient"
+    ]
+  },
+  "mixins": [
+    "makeexcuse.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabricLoaderVersion}",
+    "fabric-api": "*",
+    "minecraft": "~${fabricMcVersion}",
+    "java": ">=${modJavaVersion}"
+  },
+  "suggests": {}
+}

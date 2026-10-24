@@ -1,0 +1,98 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '[7.0.17,8)'
+}
+
+def parentProperties = file('../gradle.properties')
+if (parentProperties.exists()) {
+    def props = new Properties()
+    parentProperties.withInputStream { props.load(it) }
+    props.each { key, value ->
+        project.ext[key] = value
+    }
+}
+
+version = project.modVersion
+group = "io.github.b4n9z"
+base.archivesName = "${project.modName}-forge-mc${project.forgeMcVersion}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(project.modJavaVersion)
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['../src/main/java']
+            exclude 'io/github/b4n9z/makeexcuse/fabric/**'
+            exclude 'io/github/b4n9z/makeexcuse/neoforge/**'
+        }
+
+        resources {
+            srcDirs = ['../src/main/resources']
+            exclude 'fabric.mod.json'
+            exclude 'META-INF/neoforge.mods.toml'
+        }
+    }
+}
+
+minecraft {
+    runs {
+        configureEach {
+            workingDir = layout.projectDirectory.dir('run')
+
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.console.level', 'debug'
+            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
+
+            args "--mixin.config=makeexcuse.mixins.json"
+        }
+
+        register('client')
+        register('server')
+
+        register('data') {
+            args '--mod', 'makeexcuse',
+                    '--all',
+                    '--output', layout.buildDirectory.dir('generated/resources').get().asFile.absolutePath,
+                    '--existing', file('../src/main/resources').absolutePath
+        }
+    }
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+processResources {
+    inputs.property "version", project.modVersion
+    filesMatching("META-INF/mods.toml") {
+        expand([
+                "version": project.modVersion,
+                "forgeLoaderVersion": project.forgeLoaderVersion,
+                "modCredits": project.modCredits,
+                "modDescription": project.modDescription,
+        ])
+    }
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${project.forgeMcVersion}-${project.forgeVersion}")
+    annotationProcessor "net.minecraftforge:eventbus-validator:${project.forgeEventBusValidatorVersion}"
+}
+
+jar {
+    manifest.attributes([
+            "MixinConfigs": "makeexcuse.mixins.json"
+    ])
+}
+
+tasks.register('srcJar', Jar) {
+    archiveClassifier.set("src")
+    from sourceSets.main.allJava
+}
+
+tasks.named("assemble") {
+    dependsOn(srcJar)
+}

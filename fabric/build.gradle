@@ -1,0 +1,68 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
+}
+
+def parentProperties = file('../gradle.properties')
+if (parentProperties.exists()) {
+    def props = new Properties()
+    parentProperties.withInputStream { props.load(it) }
+    props.each { key, value ->
+        project.ext[key] = value
+    }
+}
+
+version = project.modVersion
+group = "io.github.b4n9z"
+base.archivesName = "${project.modName}-fabric-mc${project.fabricMcVersion}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(project.modJavaVersion)
+
+repositories {
+    maven {
+        url = "https://maven.terraformersmc.com/releases"
+    }
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['../src/main/java']
+            exclude 'io/github/b4n9z/makeexcuse/forge/**'
+            exclude 'io/github/b4n9z/makeexcuse/neoforge/**'
+        }
+
+        resources {
+            srcDirs = ['../src/main/resources']
+            exclude 'META-INF/mods.toml'
+            exclude 'META-INF/neoforge.mods.toml'
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.fabricMcVersion}"
+    implementation "net.fabricmc:fabric-loader:${project.fabricLoaderVersion}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabricApiVersion}"
+
+    implementation "com.terraformersmc:modmenu:${project.fabricModMenuVersion}"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand([
+                "version": project.modVersion,
+                "modJavaVersion": project.modJavaVersion,
+                "fabricMcVersion": project.fabricMcVersion,
+                "fabricLoaderVersion": project.fabricLoaderVersion,
+                "modCredits": project.modCredits,
+                "modDescription": project.modDescription,
+        ])
+    }
+}
+
+java {
+    withSourcesJar()
+}
